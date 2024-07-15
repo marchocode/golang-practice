@@ -82,4 +82,14 @@ func main() {
 	// 不会影响
 	fmt.Println(srcData)
 
+	// 尝试在其他函数中改变切片的值
+	change(srcData)
+
+	// 已经发生改变，因为切片是一个引用类型。
+	fmt.Println(srcData)
+	fmt.Printf("src point = %p\n", srcData)
+}
+
+func change(s []int) {
+	s[1] = 88
 }
