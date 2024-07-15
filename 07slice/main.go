@@ -14,7 +14,7 @@ func main() {
 	// 切片的容量=len(array)-起始位置
 	fmt.Printf("sli =%v length=%d cap=%d\n", sli, len(sli), cap(sli))
 
-	// 声明一个新切片
+	// 声明一个新切片,切片是引用类型，零值为 nil
 	var strList []string
 
 	if strList == nil {
@@ -34,53 +34,42 @@ func main() {
 	newList = make([]int, 10, 20)
 	fmt.Printf("newList len=%d cap=%d \n", len(newList), cap(newList))
 
-	// copy
-	slice1 := []int{1, 2, 3, 4, 5}
-	slice2 := []int{5, 4, 3}
-
-	// 数组大小不一致，按照较小的那个进行复制
-	copy(slice2, slice1)
-	fmt.Println(slice2)
-
-	// 复制影响
-	const elementCount = 20
-	srcData := make([]int, elementCount)
-
-	// 赋值
-	for i := 0; i < elementCount; i++ {
-		srcData[i] = i
+	// 扩容测试
+	newSlice := make([]int, 0, 1)
+	// 1024 以内
+	for i := 0; i < 10; i++ {
+		fmt.Printf("newSlice len=%d cap =%d val=%v\n", len(newSlice), cap(newSlice), newSlice)
+		newSlice = append(newSlice, i)
 	}
-	// [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	fmt.Println(srcData)
+	// 256以外
+	bigSlice := make([]int, 1024, 1024)
 
-	// [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	refData := srcData
-	fmt.Println(refData)
+	newLen := 1025
+	threshold := 256
+	size := 1024
+	newcap := size
 
-	// 复制一份
-	copyData := make([]int, elementCount)
-	copy(copyData, srcData)
-	// [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	fmt.Println(copyData)
+	for {
+		// Transition from growing 2x for small slices
+		// to growing 1.25x for large slices. This formula
+		// gives a smooth-ish transition between the two.
+		newcap += (newcap + 3*threshold) >> 2
 
-	// 修改原数据
-	srcData[0] = 99
-	// [99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	fmt.Println(srcData)
-	// [99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	fmt.Println(refData)
+		// We need to check `newcap >= newLen` and whether `newcap` overflowed.
+		// newLen is guaranteed to be larger than zero, hence
+		// when newcap overflows then `uint(newcap) > uint(newLen)`.
+		// This allows to check for both with the same comparison.
+		if uint(newcap) >= uint(newLen) {
+			break
+		}
+	}
 
-	// 由于是复制的，不会发生变化
-	// [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
-	fmt.Println(copyData)
+	fmt.Printf("resize =%d\n", newcap)
 
-	// 修改copyData
-	copyData[len(copyData)-1] = 66
-	// [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 66]
-	fmt.Println(copyData)
-
-	// 不会影响
-	fmt.Println(srcData)
+	for i := 0; i < 10; i++ {
+		fmt.Printf("bigSlice len=%d cap =%d\n", len(bigSlice), cap(bigSlice))
+		bigSlice = append(bigSlice, i)
+	}
 
 	// 尝试在其他函数中改变切片的值
 	change(srcData)
