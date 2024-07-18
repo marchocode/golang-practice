@@ -1,20 +1,25 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
 
-func connect(ip string, port int, w *sync.WaitGroup) {
+func connect(t string, ip string, port int, w *sync.WaitGroup) {
 
 	defer w.Done()
 
 	address := fmt.Sprintf("%s:%d", ip, port)
-	con, err := net.DialTimeout("tcp", address, 1*time.Second)
+	con, err := net.DialTimeout(t, address, 2*time.Second)
 
 	if err != nil {
 		return
@@ -26,34 +31,72 @@ func connect(ip string, port int, w *sync.WaitGroup) {
 
 }
 
-func generagePort() []int {
+func generagePort(r string) ([]int, error) {
 
-	port := make([]int, 1000)
+	// 1-1024
+	match, err := regexp.Match("\\d-\\d", []byte(r))
 
-	for i := 0; i < 1000; i++ {
-		port[i] = i + 1
+	if err != nil {
+		return nil, err
 	}
 
-	return port
+	if !match {
+		return nil, errors.New("port range error")
+	}
+
+	strs := strings.Split(r, "-")
+
+	start, _ := strconv.Atoi(strs[0])
+	end, _ := strconv.Atoi(strs[1])
+
+	len := (end - start) + 1
+
+	if len < 0 {
+		return nil, errors.New("port range error")
+	}
+
+	port := make([]int, len)
+
+	for i := 0; i < (end-start)+1; i++ {
+		port[i] = start + i
+	}
+
+	return port, nil
 }
 
 func main() {
 
-	host := flag.String("host", "", "your host name")
+	s := flag.String("s", "", "scan host for example: 1.1.1.1")
+	r := flag.String("r", "1-1024", "the range of the port.")
+	t := flag.String("t", "tcp", "network type: tcp or udp")
 
 	flag.Parse()
 
-	if flag.NArg() == 0 {
+	if flag.NFlag() == 0 {
+		fmt.Println("usage scan -s [IP] -r [1-1024] -t [tcp|udp]")
 		flag.PrintDefaults()
-		os.Exit(0)
+		os.Exit(1)
 	}
 
-	fmt.Println(*host)
+	if *s == "" {
+		fmt.Println("scan host is empty.")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
-	/*
-			 *Port numbers are assigned in various ways, based on three ranges: System
-		Ports (0-1023), User Ports (1024-49151), and the Dynamic and/or Private
-		Ports (49152-65535)
-	*/
+	ports, err := generagePort(*r)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var group sync.WaitGroup
+	group.Add(len(ports))
+
+	for _, p := range ports {
+		go connect(*t, *s, p, &group)
+	}
+
+	group.Wait()
 
 }
