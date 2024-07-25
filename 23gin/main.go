@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -21,8 +22,29 @@ type User struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func openDb() {
-	db, err := sql.Open("sqlite3", "sqlite.db")
+func initDb() {
+
+	db, err := sql.Open("sqlite3", "db.sqlite")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	create := `
+		CREATE TABLE users(
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			username varchar(32) not null,
+			password varchar(32) not null
+	)
+	`
+	_, err = db.Exec(create)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
 
 func setupRouter() *gin.Engine {
@@ -52,6 +74,9 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+
+	initDb()
+
 	r := setupRouter()
 	r.Run(":8080")
 }

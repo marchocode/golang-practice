@@ -2,7 +2,9 @@ package main
 
 import "fmt"
 
+// 别名
 type Integer = int
+// 新的类型
 type Name string
 
 func main() {

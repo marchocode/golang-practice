@@ -1,0 +1,26 @@
+### save
+POST http://localhost:8080/user/
+Content-Type: application/json
+
+{
+    "username": "mrc",
+    "password": "123456"
+}
+
+### get
+GET http://localhost:8080/user/1
+
+
+### update
+PUT http://localhost:8080/user/
+Content-Type: application/json
+
+{
+    "id": 2,
+    "username": "update",
+    "password": "update"
+}
+
+### delete
+DELETE http://localhost:8080/user/1
+

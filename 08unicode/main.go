@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 )
 
 func main() {
@@ -10,7 +11,7 @@ func main() {
 	// a -> U+0061
 	a := 'a'
 	// a -> 1100001
-	fmt.Printf("a = %b\n", a)
+	fmt.Printf("a = %b, type =%s \n", a, reflect.TypeOf(a).Kind())
 
 	// a -> 单字节
 	// [01100001 0 0 0 0 0 0 0 0 0 ]
