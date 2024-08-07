@@ -12,4 +12,9 @@ func main() {
 	fmt.Printf("numberPoint val=%v, its address -> %p\n", numberPoint, &numberPoint)
 	fmt.Printf("pointValue val=%v, its address -> %p\n", pointValue, &pointValue)
 
+	var a = new(struct{})
+	var b = new(struct{})
+
+	fmt.Println("a == b ", a == b)
+
 }

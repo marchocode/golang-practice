@@ -14,6 +14,10 @@ func main() {
 	// 切片的容量=len(array)-起始位置
 	fmt.Printf("sli =%v length=%d cap=%d\n", sli, len(sli), cap(sli))
 
+	// 尝试删除一个元素
+	sli = deleteByIndex(sli, 1)
+	fmt.Printf("sli deleted =%v length=%d cap=%d\n", sli, len(sli), cap(sli))
+
 	// 声明一个新切片,切片是引用类型，零值为 nil
 	var strList []string
 
@@ -40,47 +44,14 @@ func main() {
 	// 扩容的核心在于 256以内的，每次扩容都翻倍
 	// 大于256之后，按照 newcap += (newcap + 3*threshold) >> 2 进行计算容量
 	// 但这里有个内存对齐，可能手动算出来的 和实际的容量会有所差异。
-	for i := 0; i < 1026; i++ {
+	for i := 0; i < 300; i++ {
 		fmt.Printf("bigSlice len=%d cap =%d\n", len(bigSlice), cap(bigSlice))
 		bigSlice = append(bigSlice, i)
 	}
 
-	next := nextslicecap(513, 512)
-	fmt.Println(next)
 }
 
-func nextslicecap(newLen, oldCap int) int {
-
-	newcap := oldCap
-	doublecap := newcap + newcap
-	if newLen > doublecap {
-		return newLen
-	}
-
-	const threshold = 256
-	if oldCap < threshold {
-		return doublecap
-	}
-
-	for {
-		// Transition from growing 2x for small slices
-		// to growing 1.25x for large slices. This formula
-		// gives a smooth-ish transition between the two.
-		newcap += (newcap + 3*threshold) >> 2
-
-		// We need to check `newcap >= newLen` and whether `newcap` overflowed.
-		// newLen is guaranteed to be larger than zero, hence
-		// when newcap overflows then `uint(newcap) > uint(newLen)`.
-		// This allows to check for both with the same comparison.
-		if uint(newcap) >= uint(newLen) {
-			break
-		}
-	}
-
-	// Set newcap to the requested cap when
-	// the newcap calculation overflowed.
-	if newcap <= 0 {
-		return newLen
-	}
-	return newcap
+// 删除指定下标
+func deleteByIndex(slice []int, index int) []int {
+	return append(slice[:index], slice[index+1:]...)
 }
