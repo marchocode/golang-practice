@@ -10,12 +10,18 @@ func main() {
 
 	engine := gee.New()
 
-	engine.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("pong"))
+	engine.Get("/ping", func(ctx *gee.Context) {
+		ctx.String(http.StatusOK, "pong")
 	})
 
-	engine.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi"))
+	engine.Get("/hello", func(ctx *gee.Context) {
+
+		name := ctx.Query("name")
+
+		ctx.Json(http.StatusOK, gee.H{
+			"username": name,
+			"password": "123456",
+		})
 	})
 
 	engine.Run()
