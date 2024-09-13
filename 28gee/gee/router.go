@@ -53,7 +53,8 @@ func (c *router) handler(ctx *Context) {
 	ctx.Params = params
 	key := fmt.Sprintf("%s-%s", ctx.Method, n.pattern)
 
-	c.handlers[key](ctx)
+	ctx.middlewares = append(ctx.middlewares, c.handlers[key])
+	ctx.Next()
 }
 
 func (c *router) addRouter(method string, pattern string, handler HandlerFunc) {

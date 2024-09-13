@@ -3,6 +3,7 @@ package gee
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Engine struct {
@@ -63,7 +64,23 @@ func (g *RouterGroup) Post(url string, f HandlerFunc) {
 func (c *Engine) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	log.Printf("http request path=%s\n", req.URL.Path)
 	ctx := newContext(res, req)
+
+	// 给 ctx 绑定中间件
+	middlewares := make([]HandlerFunc, 0)
+
+	for _, group := range c.groups {
+
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
+
+	ctx.middlewares = middlewares
 	c.router.handler(ctx)
+}
+
+func (c *Engine) Use(middle ...HandlerFunc) {
+	c.middlewares = append(c.middlewares, middle...)
 }
 
 func (c *Engine) Run(addr string) {

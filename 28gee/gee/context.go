@@ -16,6 +16,9 @@ type Context struct {
 	Params map[string]string
 
 	Code int
+
+	middlewares []HandlerFunc
+	index    int
 }
 
 const (
@@ -28,12 +31,21 @@ func newContext(res http.ResponseWriter, req *http.Request) *Context {
 		Req:    req,
 		Method: req.Method,
 		Path:   req.URL.Path,
+		index:  -1,
 	}
 }
 
 func (c *Context) Status(code int) {
 	c.Code = code
 	c.Write.WriteHeader(code)
+}
+
+func (c *Context) Next() {
+	c.index++
+
+	for ;c.index < len(c.middlewares); c.index++ {
+		c.middlewares[c.index](c)
+	}
 }
 
 func (c *Context) SetHeader(key string, value string) {

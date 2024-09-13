@@ -9,7 +9,7 @@ import (
 func main() {
 
 	engine := gee.New()
-
+	engine.Use(gee.Logger())
 
 	v1 := engine.Group("/v1")
 
@@ -25,7 +25,7 @@ func main() {
 		v2.Get("/hello/:name", func(ctx *gee.Context) {
 
 			name := ctx.Param("name")
-	
+
 			ctx.Json(http.StatusOK, gee.H{
 				"username": name,
 				"password": "123456",
