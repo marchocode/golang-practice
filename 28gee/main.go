@@ -14,9 +14,9 @@ func main() {
 		ctx.String(http.StatusOK, "pong")
 	})
 
-	engine.Get("/hello", func(ctx *gee.Context) {
+	engine.Get("/hello/:name", func(ctx *gee.Context) {
 
-		name := ctx.Query("name")
+		name := ctx.Param("name")
 
 		ctx.Json(http.StatusOK, gee.H{
 			"username": name,
