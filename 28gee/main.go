@@ -10,6 +10,7 @@ func main() {
 
 	engine := gee.New()
 	engine.Use(gee.Logger())
+	engine.Static("/assets", "./static")
 
 	v1 := engine.Group("/v1")
 
