@@ -10,7 +10,15 @@ func main() {
 
 	engine := gee.New()
 	engine.Use(gee.Logger())
+	engine.Use(gee.Recovery())
+	
+
 	engine.Static("/assets", "./static")
+
+	engine.Get("/panic", func(ctx *gee.Context) {
+		arr := []string{"1", "2", "3"}
+		ctx.String(http.StatusOK, arr[4])
+	})
 
 	v1 := engine.Group("/v1")
 
