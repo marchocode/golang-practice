@@ -1,0 +1,6 @@
+### refresh a head
+GET http://localhost:9090/refresh_a_head?k=1
+
+
+### write
+POST http://localhost:9090/refresh_a_head?k=1&val=hello
